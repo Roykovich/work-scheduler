@@ -40,21 +40,25 @@ def main():
     service = build('calendar', 'v3', credentials=creds)
 
     schedule = create_schedule()
-    drawable_schedule = [day[:-2] for day in schedule]
-    events = create_events_object(schedule);
 
-    draw_table(
-      drawable_schedule,
-      HEADER,
-      (20 * 4, 10 * 4), 
-      (10 * 4, 10 * 4), 
-      ALIGN, 
-      {}, 
-      False
-    )
+    if schedule:
+      drawable_schedule = [day[:-2] for day in schedule]
+      events = create_events_object(schedule);
 
-    for event in events:
-      service.events().insert(calendarId='primary', body=event).execute()
+      draw_table(
+        drawable_schedule,
+        HEADER,
+        (20 * 4, 10 * 4), 
+        (10 * 4, 10 * 4), 
+        ALIGN, 
+        {}, 
+        False
+      )
+
+      for event in events:
+        service.events().insert(calendarId='primary', body=event).execute()
+    else:
+      return
 
   except HttpError as error:
     print('An error occurred: %s' % error)

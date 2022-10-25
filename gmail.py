@@ -105,7 +105,7 @@ def create_events_object(schedule):
         end_date = datetime.datetime(int(day[5]), MONTHS[day[1]], int(day[6]), int(clockout[0][0]), int(clockout[0][1]), 0)
 
         event = {
-            'summary': 'Turno',
+            'summary': 'Turno en McDonald\'s 🍔',
             'location': 'Av. las Condes 12207, Las Condes, Región Metropolitana, Chile',
             'description': 'Estas posicionado como %s' % day[4],
             'start': {
@@ -134,6 +134,8 @@ def create_schedule():
         schedule = parse_emails(msgs[0][0])
 
         return schedule
+    else:
+        return False
 
 con = imaplib.IMAP4_SSL(IMAP_URL)
 

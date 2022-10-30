@@ -58,6 +58,7 @@ def main():
       for event in events:
         service.events().insert(calendarId='primary', body=event).execute()
     else:
+      print('so nothing happened')
       return
 
   except HttpError as error:

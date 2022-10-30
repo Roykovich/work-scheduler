@@ -1,6 +1,5 @@
 # Importing libraries
-import imaplib, email, yaml, re, datetime
-from image import draw_table
+import imaplib, yaml, re, datetime
 import os.path
 
 REGEX = "(lunes|martes|mi=C3=A9rcoles|jueves|viernes|sabado|domingo), (\d+) de (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre) de (2022|2023|2024) (\d{1,2}:\d{1,2}) - (\d{1,2}:\d{1,2}), (\w*)"
@@ -20,6 +19,20 @@ MONTHS = {
     'diciembre': 12
 }
 
+EVENT_COLORS_ID = [
+    '1', # blue
+    '2', # green
+    '3' # purple
+    '4' # re
+    '5' # yellow
+    '6' # orange
+    '7' # turquoise
+    '8' # gray
+    '9' # bold blue
+    '10' # bold gree
+    '11'  #bold red
+]
+
 if os.path.exists('credentials.yml'):
     with open("credentials.yml") as f:
         content = f.read()
@@ -28,7 +41,7 @@ if os.path.exists('credentials.yml'):
 my_credentials = yaml.load(content, Loader=yaml.FullLoader)
 
 #Load the user name and passwd from yaml file
-user, password, email = my_credentials["user"], my_credentials["password"], my_credentials["email"]
+user, password, correo = my_credentials["user"], my_credentials["password"], my_credentials["email"]
 
 # Function to get email content part i.e its body part
 def get_body(msg):
@@ -40,14 +53,14 @@ def get_body(msg):
 # Function to search for a key value pair
 def search(key, value, con):
     result, data = con.search(None, key, '"{}"'.format(value))
-    return data
+    return data # the type return is bytes
 
 # Function to get the list of emails under this label 
 def get_emails(result_bytes):
     msgs = [] # all the email data are pushed into here
     for num in result_bytes[0].split():
         typ, data = con.fetch(num, '(RFC822)')
-        msgs.append(data)   
+        msgs.append(data)
 
     return msgs
 
@@ -100,10 +113,15 @@ def create_events_object(schedule):
 
         entrance = re.findall('(\d+):(\d+)', day[2])
         clockout = re.findall('(\d+):(\d+)', day[3])
-        
         start_date = datetime.datetime(int(day[5]), MONTHS[day[1]], int(day[6]), int(entrance[0][0]), int(entrance[0][1]), 0)
-        end_date = datetime.datetime(int(day[5]), MONTHS[day[1]], int(day[6]), int(clockout[0][0]), int(clockout[0][1]), 0)
 
+        # With this condition flow we can check if the clockout is in the other
+        # day
+        if int(clockout[0][0]) < int(entrance[0][0]):
+            end_date = datetime.datetime(int(day[5]), MONTHS[day[1]], int(day[6]) + 1, int(clockout[0][0]), int(clockout[0][1]), 0)
+        else:
+            end_date = datetime.datetime(int(day[5]), MONTHS[day[1]], int(day[6]), int(clockout[0][0]), int(clockout[0][1]), 0)
+        
         event = {
             'summary': 'Turno en McDonald\'s 🍔',
             'location': 'Av. las Condes 12207, Las Condes, Región Metropolitana, Chile',
@@ -116,7 +134,7 @@ def create_events_object(schedule):
                 'dateTime': end_date.isoformat('T'),
                 'timeZone': 'America/Santiago',
             },
-            'colorId': '5',
+            'colorId': EVENT_COLORS_ID[10],
             'reminders': {
                 'useDefault': False,
                 'overrides': [
@@ -133,6 +151,10 @@ def create_schedule():
     if len(msgs) == 1:
         schedule = parse_emails(msgs[0][0])
 
+        # This two lines are used to archive the email
+        con.store(message_set[0], '+FLAGS', '\\Deleted')
+        con.expunge()
+
         return schedule
     else:
         return False
@@ -143,19 +165,5 @@ con.login(user, password)
 
 con.select('Inbox')
 
-msgs = get_emails(search('FROM', email, con))
-
-# for msg in msgs[::-1]:
-#     for sent in msg:
-#         schedule = parse_emails(sent)
-#         # print(schedule)
-#         draw_table(
-#             schedule, 
-#             HEADER, 
-#             FONT, 
-#             (20 * 4, 10 * 4), 
-#             (10 * 4, 10 * 4), 
-#             ALIGN, 
-#             {}, 
-#             False
-#         )
+message_set = search('FROM', correo, con)
+msgs = get_emails(message_set)

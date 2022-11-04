@@ -2,7 +2,7 @@
 import imaplib, yaml, re, datetime
 import os.path
 
-REGEX = "(lunes|martes|mi=C3=A9rcoles|jueves|viernes|sabado|domingo), (\d+) de (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre) de (2022|2023|2024) (\d{1,2}:\d{1,2}) - (\d{1,2}:\d{1,2}), (\w*)"
+REGEX = "(lunes|martes|mi=C3=A9rcoles|jueves|viernes|s=C3=A1bado|domingo), (\d+) de (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre) de (2022|2023|2024) (\d{1,2}:\d{1,2}) - (\d{1,2}:\d{1,2}), (\w*)"
 IMAP_URL = 'imap.gmail.com'
 MONTHS = {
     'enero': 1,
@@ -81,7 +81,7 @@ def parse_emails(email):
             indexstart = data.find("ltr")
             data2 = data[indexstart + 5: len(data)]
             indexend = data2.find("</div>")
-
+            
             parsed_email = regex_body(data2[0: indexend])
 
             schedule = []
@@ -89,15 +89,23 @@ def parse_emails(email):
             # printing the required content which we need
             # to extract from our email i.e our body
             for parsed in parsed_email:
-                schedule.append(["{} {}".format(
-                    re.sub("mi=C3=A9rcoles", "miércoles", parsed[0]),
-                     parsed[1]), 
-                     parsed[2], 
-                     parsed[4], 
-                     parsed[5], 
-                     parsed[6],
-                     parsed[3], # Month thats going to be sustracted
-                     parsed[1] # Day thats going to be sustracted
+                day = parsed[0]
+                
+                if (parsed[0] == "mi=C3=A9rcoles"):
+                    day = "miércoles"
+
+                if (parsed[0] == "s=C3=A1bado"):
+                    day = "sábado"
+
+                schedule.append(
+                    [
+                        "{} {}".format(day, parsed[1]), 
+                        parsed[2], 
+                        parsed[4], 
+                        parsed[5], 
+                        parsed[6],
+                        parsed[3], # Month thats going to be sustracted
+                        parsed[1] # Day thats going to be sustracted
                     ]
                 )
 
@@ -134,7 +142,7 @@ def create_events_object(schedule):
                 'dateTime': end_date.isoformat('T'),
                 'timeZone': 'America/Santiago',
             },
-            'colorId': EVENT_COLORS_ID[10],
+            'colorId': '11',
             'reminders': {
                 'useDefault': False,
                 'overrides': [

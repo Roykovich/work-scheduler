@@ -2,8 +2,11 @@
 import imaplib, yaml, re, datetime
 import os.path
 
+# Regex string to parse the email content that I want
 REGEX = "(lunes|martes|mi=C3=A9rcoles|jueves|viernes|s=C3=A1bado|domingo), (\d+) de (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre) de (2022|2023|2024) (\d{1,2}:\d{1,2}) - (\d{1,2}:\d{1,2}), (\w*)"
+# The IMAP URL I'm going to use
 IMAP_URL = 'imap.gmail.com'
+# Month object to identify the months as numbers to parse the later with datetime
 MONTHS = {
     'enero': 1,
     'febrero': 2,
@@ -18,7 +21,7 @@ MONTHS = {
     'noviembre': 11,
     'diciembre': 12
 }
-
+# Google calendar colors id
 EVENT_COLORS_ID = [
     '1', # blue
     '2', # green
@@ -33,6 +36,7 @@ EVENT_COLORS_ID = [
     '11'  #bold red
 ]
 
+# We check first
 if os.path.exists('credentials.yml'):
     with open("credentials.yml") as f:
         content = f.read()
@@ -40,7 +44,7 @@ if os.path.exists('credentials.yml'):
 # from credentials.yml import user name and password
 my_credentials = yaml.load(content, Loader=yaml.FullLoader)
 
-#Load the user name and passwd from yaml file
+# Load the user name and passwd from yaml file
 user, password, correo = my_credentials["user"], my_credentials["password"], my_credentials["email"]
 
 # Function to get email content part i.e its body part
@@ -91,6 +95,7 @@ def parse_emails(email):
             for parsed in parsed_email:
                 day = parsed[0]
                 
+                # We filter both of this strings 
                 if (parsed[0] == "mi=C3=A9rcoles"):
                     day = "miércoles"
 
@@ -119,8 +124,10 @@ def create_events_object(schedule):
 
     for day in schedule:
 
+        # We parse the hours in mm:ss style for datetime
         entrance = re.findall('(\d+):(\d+)', day[2])
         clockout = re.findall('(\d+):(\d+)', day[3])
+
         start_date = datetime.datetime(int(day[5]), MONTHS[day[1]], int(day[6]), int(entrance[0][0]), int(entrance[0][1]), 0)
 
         # With this condition flow we can check if the clockout is in the other

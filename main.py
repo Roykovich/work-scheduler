@@ -1,4 +1,4 @@
-from __future__ import print_function
+import requests, json, yaml
 
 import os.path
 
@@ -10,11 +10,26 @@ from googleapiclient.errors import HttpError
 
 from gmail import create_schedule, create_events_object
 from image import draw_table
+from notion import create_notion_object
+
+if os.path.exists('credentials.yml'):
+  with open("credentials.yml") as f:
+    content = f.read()
+
+my_credentials = yaml.load(content, Loader=yaml.FullLoader)
+
+token = my_credentials["secret"]
 
 # If modifying these scopes, delete the file token.json
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 HEADER = ["Día", "Mes", "Entrada", "Salida", "Posición"]
 ALIGN = ['c', 'c', 'c', 'c', 'c']
+NOTION_HEADERS = {
+  "Authorization": "Bearer " + token,
+  "Content-Type": "application/json",
+  "Notion-Version": "2022-06-28"
+}
+NOTION_URL = "https://api.notion.com/v1/pages"
 
 def main():
   creds = None
@@ -44,20 +59,25 @@ def main():
     if schedule:
       drawable_schedule = [day[:-2] for day in schedule]
       events = create_events_object(schedule);
+      pages = create_notion_object(schedule)
 
-      draw_table(
-        drawable_schedule,
-        HEADER,
-        (20 * 4, 10 * 4), 
-        (10 * 4, 10 * 4), 
-        ALIGN, 
-        {}, 
-        False
-      )
+      # draw_table(
+      #   drawable_schedule,
+      #   HEADER,
+      #   (20 * 4, 10 * 4), 
+      #   (10 * 4, 10 * 4), 
+      #   ALIGN, 
+      #   {}, 
+      #   False
+      # )
 
       for event in events:
         service.events().insert(calendarId='primary', body=event).execute()
 
+      for page in pages:
+        data = json.dumps(page)
+        response = requests.request("POST", NOTION_URL, headers=NOTION_HEADERS, data=data)
+  
     else:
       print('so nothing happened')
       return

@@ -2,6 +2,3 @@ __pycache__
 credentials.json
 credentials.yml
 token.json 
-horario.png
-.gitignore
-vps

@@ -119,34 +119,46 @@ def parse_emails(email):
         except UnicodeEncodeError as e:
             pass
 
+def parse_date(day):
+    dates = {
+        "start_date": None,
+        "end_date": None
+    }
+
+    # We parse the hours in mm:ss style for datetime
+    entrance = re.findall('(\d+):(\d+)', day[2])
+    clockout = re.findall('(\d+):(\d+)', day[3])
+    
+    start_date = datetime.datetime(int(day[5]), MONTHS[day[1]], int(day[6]), int(entrance[0][0]), int(entrance[0][1]), 0)
+    # With this condition flow we can check if the clockout is in the other
+    # day
+    if int(clockout[0][0]) < int(entrance[0][0]):
+        end_date = datetime.datetime(int(day[5]), MONTHS[day[1]], int(day[6]) + 1, int(clockout[0][0]), int(clockout[0][1]), 0)
+    else:
+        end_date = datetime.datetime(int(day[5]), MONTHS[day[1]], int(day[6]), int(clockout[0][0]), int(clockout[0][1]), 0)
+
+    dates['start_date'] = start_date.isoformat("T")
+    dates['end_date'] = end_date.isoformat("T")
+
+    return dates
+
 def create_events_object(schedule):
     events = []
 
     for day in schedule:
 
-        # We parse the hours in mm:ss style for datetime
-        entrance = re.findall('(\d+):(\d+)', day[2])
-        clockout = re.findall('(\d+):(\d+)', day[3])
-
-        start_date = datetime.datetime(int(day[5]), MONTHS[day[1]], int(day[6]), int(entrance[0][0]), int(entrance[0][1]), 0)
-
-        # With this condition flow we can check if the clockout is in the other
-        # day
-        if int(clockout[0][0]) < int(entrance[0][0]):
-            end_date = datetime.datetime(int(day[5]), MONTHS[day[1]], int(day[6]) + 1, int(clockout[0][0]), int(clockout[0][1]), 0)
-        else:
-            end_date = datetime.datetime(int(day[5]), MONTHS[day[1]], int(day[6]), int(clockout[0][0]), int(clockout[0][1]), 0)
+        dates = parse_date(day)
         
         event = {
-            'summary': 'Turno en McDonald\'s 🍔',
+            'summary': 'Turno en McDonald\'s',
             'location': 'Av. las Condes 12207, Las Condes, Región Metropolitana, Chile',
             'description': 'Estas posicionado como %s' % day[4],
             'start': {
-                'dateTime': start_date.isoformat('T'),
+                'dateTime': dates["start_date"],
                 'timeZone': 'America/Santiago',
             },
             'end': {
-                'dateTime': end_date.isoformat('T'),
+                'dateTime': dates["end_date"],
                 'timeZone': 'America/Santiago',
             },
             'colorId': '11',
@@ -161,7 +173,7 @@ def create_events_object(schedule):
         events.append(event)
     
     return events
-        
+
 def create_schedule():
     if len(msgs) == 1:
         schedule = parse_emails(msgs[0][0])

@@ -2,6 +2,7 @@ import yaml
 import os.path
 
 from gmail import parse_date
+from calculations import create_calculations
 
 if os.path.exists('credentials.yml'):
   with open("credentials.yml") as f:
@@ -13,9 +14,10 @@ databaseId = my_credentials["database"]
 
 def create_notion_object(schedule):
     pages = []
-
+    
     for day in schedule:
-        dates = parse_date(day)
+        date = parse_date(day)
+        calculations = create_calculations(date)
 
         page = {
             "parent": {
@@ -25,16 +27,24 @@ def create_notion_object(schedule):
                 "Entrada" : {
                     "type": "date",
                     "date": {
-                        "start": dates["start_date"] + "-03:00",
+                        "start": date["start_date"].isoformat("T") + "-03:00",
                         "end": None,
                     }
                 },
                 "Salida" : {
                     "type": "date",
                     "date": {
-                        "start": dates["end_date"] + "-03:00",
+                        "start": date["end_date"].isoformat("T") + "-03:00",
                         "end": None,
                     }
+                },
+                "Diurnas": {
+                    "type": "number",
+                    "number": calculations["total-diurno"]
+                },
+                "Nocturnas": {
+                    "type": "number",
+                    "number": calculations["total-nocturno"]
                 },
                 "Nombre":{
                     "id":"title",

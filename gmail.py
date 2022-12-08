@@ -165,7 +165,7 @@ def create_events_object(schedule):
             'reminders': {
                 'useDefault': False,
                 'overrides': [
-                    {'method': 'popup', 'minutes': 180}
+                    {'method': 'popup', 'minutes': 150}
                 ]
             }
         }
@@ -179,8 +179,8 @@ def create_schedule():
         schedule = parse_emails(msgs[0][0])
 
         # This two lines are used to archive the email
-        # con.store(message_set[0], '+FLAGS', '\\Deleted') # ! Recuerda quitar esto
-        # con.expunge()
+        con.store(message_set[0], '+FLAGS', '\\Deleted')
+        con.expunge()
 
         return schedule
     else:

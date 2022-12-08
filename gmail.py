@@ -110,7 +110,7 @@ def parse_emails(email):
                         parsed[5], 
                         parsed[6],
                         parsed[3], # Month thats going to be sustracted
-                        parsed[1] # Day thats going to be sustracted
+                        parsed[1]  # Day thats going to be sustracted
                     ]
                 )
 
@@ -137,8 +137,8 @@ def parse_date(day):
     else:
         end_date = datetime.datetime(int(day[5]), MONTHS[day[1]], int(day[6]), int(clockout[0][0]), int(clockout[0][1]), 0)
 
-    dates['start_date'] = start_date.isoformat("T")
-    dates['end_date'] = end_date.isoformat("T")
+    dates['start_date'] = start_date
+    dates['end_date'] = end_date
 
     return dates
 
@@ -154,18 +154,18 @@ def create_events_object(schedule):
             'location': 'Av. las Condes 12207, Las Condes, Región Metropolitana, Chile',
             'description': 'Estas posicionado como %s' % day[4],
             'start': {
-                'dateTime': dates["start_date"],
+                'dateTime': dates["start_date"].isoformat("T"),
                 'timeZone': 'America/Santiago',
             },
             'end': {
-                'dateTime': dates["end_date"],
+                'dateTime': dates["end_date"].isoformat("T"),
                 'timeZone': 'America/Santiago',
             },
             'colorId': '11',
             'reminders': {
                 'useDefault': False,
                 'overrides': [
-                    {'method': 'popup', 'minutes': 150}
+                    {'method': 'popup', 'minutes': 180}
                 ]
             }
         }
@@ -179,8 +179,8 @@ def create_schedule():
         schedule = parse_emails(msgs[0][0])
 
         # This two lines are used to archive the email
-        con.store(message_set[0], '+FLAGS', '\\Deleted')
-        con.expunge()
+        # con.store(message_set[0], '+FLAGS', '\\Deleted') # ! Recuerda quitar esto
+        # con.expunge()
 
         return schedule
     else:

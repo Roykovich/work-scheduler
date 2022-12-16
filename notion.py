@@ -10,7 +10,7 @@ if os.path.exists('credentials.yml'):
 
 my_credentials = yaml.load(content, Loader=yaml.FullLoader)
 
-databaseId = my_credentials["database"]
+databaseId, first_payment, second_payment = my_credentials["database"], my_credentials["first_payment"], my_credentials["second_payment"]
 
 def create_notion_object(schedule):
     pages = []
@@ -18,6 +18,7 @@ def create_notion_object(schedule):
     for day in schedule:
         date = parse_date(day)
         calculations = create_calculations(date)
+        entrance = date["start_date"].day
 
         page = {
             "parent": {
@@ -46,16 +47,24 @@ def create_notion_object(schedule):
                     "type": "number",
                     "number": calculations["total-nocturno"]
                 },
+                "Relation": {
+                    "relation": [
+                        {
+                            "id": first_payment if entrance <= 15 else second_payment
+                        }
+                    ],
+                    "has_more": False
+                },
                 "Nombre":{
                     "id":"title",
                     "type":"title",
                     "title": [{
                           "type":"text",
                           "text": {
-                              "content":"Turno en McDonalds",
+                              "content":"Turno en McDonald's",
                               "link": None
                           },
-                          "plain_text":"Turno en McDonalds",
+                          "plain_text":"Turno en McDonald's",
                           "href": None
                       }]
                 }

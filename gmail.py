@@ -148,7 +148,20 @@ def create_events_object(schedule):
     for day in schedule:
 
         dates = parse_date(day)
+        entrance = dates['start_date'].hour
+        clockout = dates['end_date'].hour
+        colorID = None
         
+        if entrance >= 11 and clockout == 22: # Medium
+            colorID = '11'
+        elif entrance >= 15 and clockout == 1: # closing
+            colorID = '10'
+        elif entrance >= 20 and clockout <= 8: # Nocturnal
+            colorID = '8'                      
+        else:
+            colorID = '1'
+        
+        print(colorID)
         event = {
             'summary': 'Turno en McDonald\'s',
             'location': 'Av. las Condes 12207, Las Condes, Región Metropolitana, Chile',
@@ -161,7 +174,7 @@ def create_events_object(schedule):
                 'dateTime': dates["end_date"].isoformat("T"),
                 'timeZone': 'America/Santiago',
             },
-            'colorId': '11',
+            'colorId': colorID,
             'reminders': {
                 'useDefault': False,
                 'overrides': [

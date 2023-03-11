@@ -150,20 +150,25 @@ def create_events_object(schedule):
         dates = parse_date(day)
         entrance = dates['start_date'].hour
         clockout = dates['end_date'].hour
+        summary = None
         colorID = None
         
         if entrance >= 11 and clockout == 22: # Medium
             colorID = '11'
+            summary = "Turno medio"
         elif entrance >= 15 and clockout == 1: # closing
             colorID = '10'
+            summary = "Turno cierre"
         elif entrance >= 20 and clockout <= 8: # Nocturnal
-            colorID = '8'                      
+            colorID = '8'
+            summary = "Turno nocturno"
         else:
             colorID = '1'
+            summary = "Turno apertura"
         
-        print(colorID)
+        print(summary)
         event = {
-            'summary': 'Turno en McDonald\'s',
+            'summary': summary,
             'location': 'Av. las Condes 12207, Las Condes, Región Metropolitana, Chile',
             'description': 'Estas posicionado como %s' % day[4],
             'start': {

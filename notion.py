@@ -18,7 +18,19 @@ def create_notion_object(schedule):
     for day in schedule:
         date = parse_date(day)
         calculations = create_calculations(date)
+        entrance_hour = date["start_date"].hour
+        clockout_hour = date['end_date'].hour
         entrance = date["start_date"].day
+        shift = None
+
+        if entrance_hour >= 11 and clockout_hour == 22: # Medium
+            shift = "Turno medio"
+        elif entrance_hour >= 15 and clockout_hour == 1: # closing
+            shift = "Turno cierre"
+        elif entrance_hour >= 20 and clockout_hour <= 8: # Nocturnal
+            shift = "Turno nocturno"
+        else:
+            shift = "Turno apertura"
 
         page = {
             "parent": {
@@ -61,10 +73,10 @@ def create_notion_object(schedule):
                     "title": [{
                           "type":"text",
                           "text": {
-                              "content":"Turno en McDonald's",
+                              "content": shift,
                               "link": None
                           },
-                          "plain_text":"Turno en McDonald's",
+                          "plain_text": shift,
                           "href": None
                       }]
                 }

@@ -202,7 +202,7 @@ def create_schedule():
 
         return schedule
     else:
-        print('omg theres no email')
+        print('No email found.')
         return False
 
 con = imaplib.IMAP4_SSL(IMAP_URL)

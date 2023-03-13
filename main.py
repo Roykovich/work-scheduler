@@ -1,4 +1,4 @@
-import requests, json, yaml
+import requests, json, yaml, datetime
 
 import os.path
 
@@ -18,7 +18,7 @@ if os.path.exists('credentials.yml'):
 
 my_credentials = yaml.load(content, Loader=yaml.FullLoader)
 
-token = my_credentials["secret"]
+token, database = my_credentials["secret"], my_credentials["database"]
 
 # If modifying these scopes, delete the file token.json
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
@@ -30,6 +30,8 @@ NOTION_HEADERS = {
   "Notion-Version": "2022-06-28"
 }
 NOTION_URL = "https://api.notion.com/v1/pages"
+DATABASE = f"https://api.notion.com/v1/databases/{database}/query"
+DATENOW = datetime.datetime.now()
 
 def main():
   creds = None
@@ -57,19 +59,35 @@ def main():
     schedule = create_schedule()
 
     if schedule:
-      drawable_schedule = [day[:-2] for day in schedule]
+      # drawable_schedule = [day[:-2] for day in schedule] # DEPRECATED
       events = create_events_object(schedule);
       pages = create_notion_object(schedule)
 
-      # draw_table(
-      #   drawable_schedule,
-      #   HEADER,
-      #   (20 * 4, 10 * 4), 
-      #   (10 * 4, 10 * 4), 
-      #   ALIGN, 
-      #   {}, 
-      #   False
-      # )
+      # Deprecated
+      # draw_table(drawable_schedule, HEADER, (20 * 4, 10 * 4), (10 * 4, 10 * 4), ALIGN, {}, False)
+
+      # check if the current day is greater than 15 to delete all the relations
+      # in the pasts months, with that we can have a clear look of the next payment
+      if  DATENOW.day >= 15:
+        print("Deleting old entries.")
+
+        database_response = requests.request("POST", DATABASE, headers=NOTION_HEADERS)
+        res_data = database_response.json()
+        results_array = res_data["results"]
+
+        for result in results_array:
+          entry_date = result["properties"]["Entrada"]["date"]["start"]
+          parsed_entrydate = datetime.datetime.fromisoformat(entry_date)
+          entry_id = result["id"]
+
+          if parsed_entrydate.strftime("%B") != DATENOW.strftime("%B"):
+            result["properties"]["Relation"]["relation"] = []
+            new_dump = json.dumps(result)
+            delete_response = requests.request("PATCH", f"{NOTION_URL}/{entry_id}", headers=NOTION_HEADERS, data=new_dump)
+
+      else:
+        print("Old dates have not been deleted.")
+
 
       for event in events:
         service.events().insert(calendarId='primary', body=event).execute()
@@ -79,7 +97,7 @@ def main():
         response = requests.request("POST", NOTION_URL, headers=NOTION_HEADERS, data=data)
   
     else:
-      print('so nothing happened')
+      print('Script not executed.')
       return
 
   except HttpError as error:

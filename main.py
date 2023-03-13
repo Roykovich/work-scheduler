@@ -90,9 +90,11 @@ def main():
 
 
       for event in events:
+        print("Starting Google calendar insertions...")
         service.events().insert(calendarId='primary', body=event).execute()
 
       for page in pages:
+        print("Starting Notion database insertions...")
         data = json.dumps(page)
         response = requests.request("POST", NOTION_URL, headers=NOTION_HEADERS, data=data)
   

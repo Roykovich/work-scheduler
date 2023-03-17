@@ -64,7 +64,11 @@ def main():
       pages = create_notion_object(schedule)
 
       # Deprecated
-      # draw_table(drawable_schedule, HEADER, (20 * 4, 10 * 4), (10 * 4, 10 * 4), ALIGN, {}, False)
+      # draw_table(drawable_schedule, HEADER, (20 * 4, 10 * 4), (10 * 4, 10 * 4), ALIGN, {}, False
+
+      # ! con timedelta(day=x) puedes sumar o restar dias si vas a crear el modulo para los pagos
+
+
 
       # check if the current day is greater than 15 to delete all the relations
       # in the pasts months, with that we can have a clear look of the next payment
@@ -85,19 +89,22 @@ def main():
             new_dump = json.dumps(result)
             delete_response = requests.request("PATCH", f"{NOTION_URL}/{entry_id}", headers=NOTION_HEADERS, data=new_dump)
 
+        print("old entries deleted sucessfully.")
       else:
         print("Old dates have not been deleted.")
 
 
+      print("Starting Google calendar insertions...")
       for event in events:
-        print("Starting Google calendar insertions...")
         service.events().insert(calendarId='primary', body=event).execute()
+      print("Google calendar events added sucessfully.")
 
+      print("Starting Notion database insertions...")
       for page in pages:
-        print("Starting Notion database insertions...")
         data = json.dumps(page)
         response = requests.request("POST", NOTION_URL, headers=NOTION_HEADERS, data=data)
-  
+      print("Notion insertions added succesfully.")
+
     else:
       print('Script not executed.')
       return

@@ -1,4 +1,4 @@
-import requests, json, yaml, datetime
+import requests, json, yaml, datetime, sys
 
 import os.path
 
@@ -72,28 +72,35 @@ def main():
 
       # check if the current day is greater than 15 to delete all the relations
       # in the pasts months, with that we can have a clear look of the next payment
-      if  DATENOW.day >= 15:
-        print("Deleting old entries.")
+      
+      if len(sys.argv) > 1:
+        delete_arg = sys.argv[1]
 
-        database_response = requests.request("POST", DATABASE, headers=NOTION_HEADERS)
-        res_data = database_response.json()
-        results_array = res_data["results"]
+        if delete_arg == '-delete':
+          if  DATENOW.day >= 15:
+            print("Deleting old entries.")
 
-        for result in results_array:
-          entry_date = result["properties"]["Entrada"]["date"]["start"]
-          parsed_entrydate = datetime.datetime.fromisoformat(entry_date)
-          entry_id = result["id"]
+            database_response = requests.request("POST", DATABASE, headers=NOTION_HEADERS)
+            res_data = database_response.json()
+            results_array = res_data["results"]
 
-          if parsed_entrydate.strftime("%B") != DATENOW.strftime("%B"):
-            result["properties"]["Relation"]["relation"] = []
-            new_dump = json.dumps(result)
-            delete_response = requests.request("PATCH", f"{NOTION_URL}/{entry_id}", headers=NOTION_HEADERS, data=new_dump)
+            for result in results_array:
+              entry_date = result["properties"]["Entrada"]["date"]["start"]
+              parsed_entrydate = datetime.datetime.fromisoformat(entry_date)
+              entry_id = result["id"]
 
-        print("old entries deleted sucessfully.")
-      else:
-        print("Old dates have not been deleted.")
+              if parsed_entrydate.strftime("%B") != DATENOW.strftime("%B"):
+                result["properties"]["Relation"]["relation"] = []
+                new_dump = json.dumps(result)
+                delete_response = requests.request("PATCH", f"{NOTION_URL}/{entry_id}", headers=NOTION_HEADERS, data=new_dump)
 
+            print("old entries deleted sucessfully.")
+          else:
+            print("Old dates have not been deleted.")
+        else:
+          print("wrong delete argument given. Try instead -delete")
 
+      
       print("Starting Google calendar insertions...")
       for event in events:
         service.events().insert(calendarId='primary', body=event).execute()

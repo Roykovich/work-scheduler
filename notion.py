@@ -40,14 +40,14 @@ def create_notion_object(schedule):
                 "Entrada" : {
                     "type": "date",
                     "date": {
-                        "start": date["start_date"].isoformat("T") + "-03:00",
+                        "start": date["start_date"].isoformat("T") + "-04:00",
                         "end": None,
                     }
                 },
                 "Salida" : {
                     "type": "date",
                     "date": {
-                        "start": date["end_date"].isoformat("T") + "-03:00",
+                        "start": date["end_date"].isoformat("T") + "-04:00",
                         "end": None,
                     }
                 },

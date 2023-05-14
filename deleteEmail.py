@@ -1,6 +1,8 @@
 import datetime, sys, requests, json
 
 DATENOW = datetime.datetime.now()
+AFFFIRMATIVE = ['yes', 'yeah', 'y']
+NEGATIVE = ['no', 'nope', 'n']
 
 def delete_old_entries(database, headers, url):
   if len(sys.argv) > 1:
@@ -10,15 +12,17 @@ def delete_old_entries(database, headers, url):
       if  DATENOW.day >= 15:
         delete_entries(database, headers, url)
       else:
-        user_answer = input("We are still in the range of days 1-14 of the month. are you sure you want to delete the old entries? y/n.")
-        
-        while(user_answer != 'yes' or 'y' or 'no' or 'n'):
-          print("Try using Yes or No") 
+        while True:
+          user_answer = input("We are still in the range of days 1-14 of the month. are you sure you want to delete the old entries? [y/n].")
 
-        if (user_answer == 'yes' or 'y'):
-          delete_entries(database, headers, url)
-        else:
-          print("Old dates have not been deleted.")
+          if user_answer.lower() in AFFFIRMATIVE:
+            delete_entries(database, headers, url)
+            break
+          elif user_answer.lower() in NEGATIVE:
+            print("Alright, old entries won't be deleted.")
+            break
+          else:
+            print("Try using Yes or No") 
     else:
       print("wrong delete argument given. Try instead -delete")
   else:

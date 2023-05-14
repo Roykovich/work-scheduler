@@ -86,9 +86,8 @@ def main():
         data = json.dumps(page)
         response = requests.request("POST", NOTION_URL, headers=NOTION_HEADERS, data=data)
       print("Notion insertions added succesfully.")
-
     else:
-      delete_old_entries(DATABASE, NOTION_HEADERS, NOTION_URL)
+      print('You want to delete old entries? Try the argument -delete')
       return
 
   except HttpError as error:

@@ -8,18 +8,54 @@ REGEX = "(lunes|martes|mi=C3=A9rcoles|jueves|viernes|s=C3=A1bado|domingo), (\d+)
 IMAP_URL = 'imap.gmail.com'
 # Month object to identify the months as numbers to parse the later with datetime
 MONTHS = {
-    'enero': 1,
-    'febrero': 2,
-    'marzo': 3,
-    'abril': 4,
-    'mayo': 5,
-    'junio': 6,
-    'julio': 7,
-    'agosto': 8,
-    'septiembre': 9,
-    'octubre': 10,
-    'noviembre': 11,
-    'diciembre': 12
+    'enero': {
+        'month': 1,
+        'endMonth': 31 
+        },
+    'febrero': {
+        'month': 2,
+        'endMonth': 28
+        },
+    'marzo': {
+        'month': 3,
+        'endMonth': 31
+        },
+    'abril': {
+        'month': 4,
+        'endMonth': 30
+        },
+    'mayo': {
+        'month': 5,
+        'endMonth': 31
+        },
+    'junio': {
+        'month': 6,
+        'endMonth': 30
+        },
+    'julio': {
+        'month': 7,
+        'endMonth': 31
+        },
+    'agosto': {
+        'month': 8,
+        'endMonth': 31
+        },
+    'septiembre': {
+        'month': 9,
+        'endMonth': 30
+        },
+    'octubre': {
+        'month': 10,
+        'endMonth': 21
+        },
+    'noviembre': {
+        'month': 11,
+        'endMonth': 30
+        },
+    'diciembre': {
+        'month': 12,
+        'endMonth': 31
+    }
 }
 # Google calendar colors id
 EVENT_COLORS_ID = [
@@ -129,13 +165,16 @@ def parse_date(day):
     entrance = re.findall('(\d+):(\d+)', day[2])
     clockout = re.findall('(\d+):(\d+)', day[3])
     
-    start_date = datetime.datetime(int(day[5]), MONTHS[day[1]], int(day[6]), int(entrance[0][0]), int(entrance[0][1]), 0)
+    start_date = datetime.datetime(int(day[5]), MONTHS[day[1]]['month'], int(day[6]), int(entrance[0][0]), int(entrance[0][1]), 0)
     # With this condition flow we can check if the clockout is in the other
     # day
     if int(clockout[0][0]) < int(entrance[0][0]):
-        end_date = datetime.datetime(int(day[5]), MONTHS[day[1]], int(day[6]) + 1, int(clockout[0][0]), int(clockout[0][1]), 0)
+        if end_of_month(day[1], day[6]):
+            end_date = datetime.datetime(int(day[5]), MONTHS[day[1]]['month'] + 1, 1, int(clockout[0][0]), int(clockout[0][1]), 0)
+        else:    
+            end_date = datetime.datetime(int(day[5]), MONTHS[day[1]]['month'], int(day[6]) + 1, int(clockout[0][0]), int(clockout[0][1]), 0)
     else:
-        end_date = datetime.datetime(int(day[5]), MONTHS[day[1]], int(day[6]), int(clockout[0][0]), int(clockout[0][1]), 0)
+        end_date = datetime.datetime(int(day[5]), MONTHS[day[1]]['month'], int(day[6]), int(clockout[0][0]), int(clockout[0][1]), 0)
 
     dates['start_date'] = start_date
     dates['end_date'] = end_date
@@ -196,14 +235,23 @@ def create_schedule():
     if len(msgs) == 1:
         schedule = parse_emails(msgs[0][0])
 
-        # This two lines are used to archive the email
-        con.store(message_set[0], '+FLAGS', '\\Deleted')
-        con.expunge()
+        archive_email()
 
         return schedule
     else:
         print('No email found.')
         return False
+
+def archive_email():
+    # This two lines are used to archive the email
+    con.store(message_set[0], '+FLAGS', '\\Deleted')
+    con.expunge()
+
+def end_of_month(month, day):
+    end_day = MONTHS[month]['endMonth']
+    next_day = int(day) + 1
+    return end_day < next_day
+
 
 con = imaplib.IMAP4_SSL(IMAP_URL)
 

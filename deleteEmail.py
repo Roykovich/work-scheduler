@@ -5,28 +5,28 @@ AFFFIRMATIVE = ['yes', 'yeah', 'y']
 NEGATIVE = ['no', 'nope', 'n']
 
 def delete_old_entries(database, headers, url):
-  if len(sys.argv) > 1:
-    delete_arg = sys.argv[1]
+  if len(sys.argv) < 1: return
+  
+  delete_arg = sys.argv[1]
 
-    if delete_arg == '-delete':
-      if  DATENOW.day >= 15:
+  if delete_arg != '-delete':
+    print("wrong delete argument given. Try instead -delete")
+
+  if DATENOW.day < 27:
+    while True:
+      user_answer = input("We are still in the range of days 1-14 of the month. are you sure you want to delete the old entries? [y/n].")
+
+      if user_answer.lower() in AFFFIRMATIVE:
         delete_entries(database, headers, url)
+        return
+      elif user_answer.lower() in NEGATIVE:
+        print("Alright, old entries won't be deleted.")
+        return
       else:
-        while True:
-          user_answer = input("We are still in the range of days 1-14 of the month. are you sure you want to delete the old entries? [y/n].")
+        print("Try using Yes or No")
 
-          if user_answer.lower() in AFFFIRMATIVE:
-            delete_entries(database, headers, url)
-            break
-          elif user_answer.lower() in NEGATIVE:
-            print("Alright, old entries won't be deleted.")
-            break
-          else:
-            print("Try using Yes or No") 
-    else:
-      print("wrong delete argument given. Try instead -delete")
-  else:
-    return
+  delete_entries(database, headers, url)
+      
   
 def delete_entries(database, headers, url):
   print("Deleting old entries.")

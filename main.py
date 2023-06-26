@@ -1,4 +1,4 @@
-import requests, json, yaml, datetime, sys
+import requests, json, yaml, datetime
 
 import os.path
 
@@ -58,6 +58,10 @@ def main():
     service = build('calendar', 'v3', credentials=creds)
 
     schedule = create_schedule()
+    
+    # check if the current day is greater than 15 to delete all the relations
+    # in the pasts months, with that we can have a clear look of the next payment
+    delete_old_entries(DATABASE, NOTION_HEADERS, NOTION_URL)
 
     if schedule:
       # drawable_schedule = [day[:-2] for day in schedule] # DEPRECATED
@@ -69,13 +73,6 @@ def main():
 
       # ! con timedelta(day=x) puedes sumar o restar dias si vas a crear el modulo para los pagos
 
-
-
-      # check if the current day is greater than 15 to delete all the relations
-      # in the pasts months, with that we can have a clear look of the next payment
-      delete_old_entries(DATABASE, NOTION_HEADERS, NOTION_URL)
-
-      
       print("Starting Google calendar insertions...")
       for event in events:
         service.events().insert(calendarId='primary', body=event).execute()
@@ -87,7 +84,6 @@ def main():
         response = requests.request("POST", NOTION_URL, headers=NOTION_HEADERS, data=data)
       print("Notion insertions added succesfully.")
     else:
-      print('You want to delete old entries? Try the argument -delete')
       return
 
   except HttpError as error:

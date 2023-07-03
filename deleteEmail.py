@@ -5,7 +5,7 @@ AFFFIRMATIVE = ['yes', 'yeah', 'y']
 NEGATIVE = ['no', 'nope', 'n']
 
 def delete_old_entries(database, headers, url):
-  if len(sys.argv) < 1: return
+  if len(sys.argv) < 2: return
   
   delete_arg = sys.argv[1]
 

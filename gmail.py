@@ -3,7 +3,8 @@ import imaplib, yaml, re, datetime
 import os.path
 
 # Regex string to parse the email content that I want
-REGEX = "(lunes|martes|mi=C3=A9rcoles|jueves|viernes|s=C3=A1bado|domingo), (\d+) de (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre) de (2022|2023|2024) (\d{1,2}:\d{1,2}) - (\d{1,2}:\d{1,2}), (\w*)"
+OLD_REGEX = "(lunes|martes|mi=C3=A9rcoles|jueves|viernes|s=C3=A1bado|domingo), (\d+) de (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre) de (2022|2023|2024) (\d{1,2}:\d{1,2}) - (\d{1,2}:\d{1,2}), (\w*)"
+NEW_REGEX = '<span>([a-zA-ZáéíóúÁÉÍÓÚ]+) (\d+) de ([a-zA-ZáéíóúÁÉÍÓÚ]+) de (\d+)</span>\s*<i><span>(\d{2}:\d{2}) - (\d{2}:\d{2})</span></i>'
 # The IMAP URL I'm going to use
 IMAP_URL = 'imap.gmail.com'
 # Month object to identify the months as numbers to parse the later with datetime
@@ -104,10 +105,6 @@ def get_emails(result_bytes):
 
     return msgs
 
-# Regex for the body
-def regex_body(body):
-    return re.findall(REGEX, body)
-
 # Function that parse emails
 def parse_emails(email):
     if type(email) is tuple:
@@ -118,12 +115,8 @@ def parse_emails(email):
 
         # Handling errors related to unicode
         try: 
-            indexstart = data.find("ltr")
-            data2 = data[indexstart + 5: len(data)]
-            indexend = data2.find("</div>")
-            
-            parsed_email = regex_body(data2[0: indexend])
-
+            parsed_email = re.findall(NEW_REGEX, data)
+            print(parsed_email)
             schedule = []
 
             # printing the required content which we need
@@ -235,6 +228,7 @@ def create_schedule():
     if len(msgs) == 1:
         schedule = parse_emails(msgs[0][0])
 
+        # archives the email
         archive_email()
 
         return schedule

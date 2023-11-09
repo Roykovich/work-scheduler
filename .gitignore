@@ -3,3 +3,4 @@ credentials.json
 credentials.yml
 token.json 
 notion.test.py
+email/

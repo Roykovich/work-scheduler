@@ -116,32 +116,11 @@ def parse_emails(email):
         # Handling errors related to unicode
         try: 
             parsed_email = re.findall(NEW_REGEX, data)
-            print(parsed_email)
             schedule = []
 
-            # printing the required content which we need
-            # to extract from our email i.e our body
+            # ensures to cast to a list every tuple of parsed_email and push to schedule list
             for parsed in parsed_email:
-                day = parsed[0]
-                
-                # We filter both of this strings 
-                if (parsed[0] == "mi=C3=A9rcoles"):
-                    day = "miércoles"
-
-                if (parsed[0] == "s=C3=A1bado"):
-                    day = "sábado"
-
-                schedule.append(
-                    [
-                        "{} {}".format(day, parsed[1]), 
-                        parsed[2], 
-                        parsed[4], 
-                        parsed[5], 
-                        parsed[6],
-                        parsed[3], # Month thats going to be sustracted
-                        parsed[1]  # Day thats going to be sustracted
-                    ]
-                )
+                schedule.append(list(parsed))
 
             return schedule
 
@@ -229,7 +208,7 @@ def create_schedule():
         schedule = parse_emails(msgs[0][0])
 
         # archives the email
-        archive_email()
+        # archive_email()
 
         return schedule
     else:

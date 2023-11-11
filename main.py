@@ -10,7 +10,7 @@ from googleapiclient.errors import HttpError
 
 from gmail import create_schedule, create_events_object
 # from image import draw_table
-# from notion import create_notion_object
+from notion import create_notion_object
 from deleteEmail import delete_old_entries
 
 if os.path.exists('credentials.yml'):
@@ -66,7 +66,7 @@ def main():
     if schedule:
       # ! drawable_schedule = [day[:-2] for day in schedule] # DEPRECATED
       events = create_events_object(schedule)
-      # pages = create_notion_object(schedule)
+      pages = create_notion_object(schedule)
 
       # ! Deprecated
       # draw_table(drawable_schedule, HEADER, (20 * 4, 10 * 4), (10 * 4, 10 * 4), ALIGN, {}, False
@@ -79,10 +79,11 @@ def main():
       print("Google calendar events added sucessfully.")
 
       print("Starting Notion database insertions...")
-      # for page in pages:
-      #   data = json.dumps(page)
-      #   response = requests.request("POST", NOTION_URL, headers=NOTION_HEADERS, data=data)
+      for page in pages:
+        data = json.dumps(page)
+        response = requests.request("POST", NOTION_URL, headers=NOTION_HEADERS, data=data)
       print("Notion insertions added succesfully.")
+      
     else:
       return
 

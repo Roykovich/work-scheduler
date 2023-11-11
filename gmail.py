@@ -134,19 +134,19 @@ def parse_date(day):
     }
 
     # We parse the hours in mm:ss style for datetime
-    entrance = re.findall('(\d+):(\d+)', day[2])
-    clockout = re.findall('(\d+):(\d+)', day[3])
+    entrance = re.findall('(\d+):(\d+)', day[4])
+    clockout = re.findall('(\d+):(\d+)', day[5])
     
-    start_date = datetime.datetime(int(day[5]), MONTHS[day[1]]['month'], int(day[6]), int(entrance[0][0]), int(entrance[0][1]), 0)
+    start_date = datetime.datetime(int(day[3]), MONTHS[day[2]]['month'], int(day[1]), int(entrance[0][0]), int(entrance[0][1]), 0)
     # With this condition flow we can check if the clockout is in the other
     # day
     if int(clockout[0][0]) < int(entrance[0][0]):
-        if end_of_month(day[1], day[6]):
-            end_date = datetime.datetime(int(day[5]), MONTHS[day[1]]['month'] + 1, 1, int(clockout[0][0]), int(clockout[0][1]), 0)
+        if end_of_month(day[2], day[1]):
+            end_date = datetime.datetime(int(day[3]), MONTHS[day[2]]['month'] + 1, 1, int(clockout[0][0]), int(clockout[0][1]), 0)
         else:    
-            end_date = datetime.datetime(int(day[5]), MONTHS[day[1]]['month'], int(day[6]) + 1, int(clockout[0][0]), int(clockout[0][1]), 0)
+            end_date = datetime.datetime(int(day[3]), MONTHS[day[2]]['month'], int(day[1]) + 1, int(clockout[0][0]), int(clockout[0][1]), 0)
     else:
-        end_date = datetime.datetime(int(day[5]), MONTHS[day[1]]['month'], int(day[6]), int(clockout[0][0]), int(clockout[0][1]), 0)
+        end_date = datetime.datetime(int(day[3]), MONTHS[day[2]]['month'], int(day[1]), int(clockout[0][0]), int(clockout[0][1]), 0)
 
     dates['start_date'] = start_date
     dates['end_date'] = end_date
@@ -157,7 +157,6 @@ def create_events_object(schedule):
     events = []
 
     for day in schedule:
-
         dates = parse_date(day)
         entrance = dates['start_date'].hour
         clockout = dates['end_date'].hour
@@ -181,7 +180,7 @@ def create_events_object(schedule):
         event = {
             'summary': summary,
             'location': 'Av. las Condes 12207, Las Condes, Región Metropolitana, Chile',
-            'description': 'Estas posicionado como %s' % day[4],
+            'description': 'Pronto llegara, el dia de mi suelte',
             'start': {
                 'dateTime': dates["start_date"].isoformat("T"),
                 'timeZone': 'America/Santiago',
@@ -203,18 +202,6 @@ def create_events_object(schedule):
     
     return events
 
-def create_schedule():
-    if len(msgs) == 1:
-        schedule = parse_emails(msgs[0][0])
-
-        # archives the email
-        # archive_email()
-
-        return schedule
-    else:
-        print('No email found.')
-        return False
-
 def archive_email():
     # This two lines are used to archive the email
     con.store(message_set[0], '+FLAGS', '\\Deleted')
@@ -224,6 +211,18 @@ def end_of_month(month, day):
     end_day = MONTHS[month]['endMonth']
     next_day = int(day) + 1
     return end_day < next_day
+
+def create_schedule():
+    if len(msgs) == 1:
+        schedule = parse_emails(msgs[0][0])
+
+        # archives the email
+        archive_email()
+
+        return schedule
+    else:
+        print('No email found.')
+        return False
 
 
 con = imaplib.IMAP4_SSL(IMAP_URL)

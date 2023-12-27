@@ -202,18 +202,6 @@ def create_events_object(schedule):
     
     return events
 
-def create_schedule():
-    if len(msgs) == 1:
-        schedule = parse_emails(msgs[0][0])
-
-        # archives the email
-        # archive_email()
-
-        return schedule
-    else:
-        print('No email found.')
-        return False
-
 def archive_email():
     # This two lines are used to archive the email
     con.store(message_set[0], '+FLAGS', '\\Deleted')
@@ -223,6 +211,19 @@ def end_of_month(month, day):
     end_day = MONTHS[month]['endMonth']
     next_day = int(day) + 1
     return end_day < next_day
+
+def create_schedule():
+    if len(msgs) == 1:
+        schedule = parse_emails(msgs[0][0])
+
+        # archives the email
+        archive_email()
+
+        return schedule
+    else:
+        print('No email found.')
+        return False
+
 
 con = imaplib.IMAP4_SSL(IMAP_URL)
 

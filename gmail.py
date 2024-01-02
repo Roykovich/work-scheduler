@@ -185,8 +185,8 @@ def create_schedule():
     if len(emails) == 1:
         schedule = parse_emails(emails[0][0])
         # archives the email
-        # con.store(message_set[0], '+FLAGS', '\\Deleted')
-        # con.expunge()
+        con.store(message_set[0], '+FLAGS', '\\Deleted')
+        con.expunge()
         
         return schedule
     else:

@@ -1,5 +1,6 @@
 import yaml
 import os.path
+import datetime
 
 from gmail import parse_date
 from calculations import create_calculations
@@ -11,6 +12,27 @@ if os.path.exists('credentials.yml'):
 my_credentials = yaml.load(content, Loader=yaml.FullLoader)
 
 databaseId, first_payment, second_payment = my_credentials["database"], my_credentials["first_payment"], my_credentials["second_payment"]
+
+def create_calculations(date):
+  if type(date) is list: return
+  
+  new_dict = dict(date)
+
+  calculations = {
+    "total-diurno": 0,
+    "total-nocturno": 0,
+  }
+  new_dict["start_date"] += datetime.timedelta(minutes=30)
+
+  while new_dict["start_date"] < new_dict["end_date"]:
+    if (6 <= new_dict["start_date"].hour < 22):
+      calculations["total-diurno"] += 1
+    else:
+      calculations["total-nocturno"] += 1
+
+    new_dict["start_date"] += datetime.timedelta(hours=1)
+
+  return calculations
 
 def create_notion_object(schedule):
     pages = []

@@ -9,7 +9,6 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from gmail import create_schedule, create_events_object
-# from image import draw_table
 from notion import create_notion_object
 from deleteEmail import delete_old_entries
 
@@ -64,12 +63,8 @@ def main():
     delete_old_entries(DATABASE, NOTION_HEADERS, NOTION_URL)
 
     if schedule:
-      # ! drawable_schedule = [day[:-2] for day in schedule] # DEPRECATED
       events = create_events_object(schedule)
       pages = create_notion_object(schedule)
-
-      # ! Deprecated
-      # draw_table(drawable_schedule, HEADER, (20 * 4, 10 * 4), (10 * 4, 10 * 4), ALIGN, {}, False
 
       # ! con timedelta(day=x) puedes sumar o restar dias si vas a crear el modulo para los pagos
 

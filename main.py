@@ -23,7 +23,6 @@ token, database = my_credentials["secret"], my_credentials["database"]
 # If modifying these scopes, delete the file token.json
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 HEADER = ["Día", "Mes", "Entrada", "Salida", "Posición"]
-ALIGN = ['c', 'c', 'c', 'c', 'c']
 NOTION_HEADERS = {
   "Authorization": "Bearer " + token,
   "Content-Type": "application/json",

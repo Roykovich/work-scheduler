@@ -3,7 +3,6 @@ import os.path
 import datetime
 
 from gmail import parse_date
-from calculations import create_calculations
 
 if os.path.exists('credentials.yml'):
   with open("credentials.yml") as f:

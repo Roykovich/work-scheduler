@@ -1,62 +1,24 @@
-# Importing libraries
 import imaplib, yaml, re, datetime
 import os.path
 
 # Regex string to parse the email content that I want
-OLD_REGEX = "(lunes|martes|mi=C3=A9rcoles|jueves|viernes|s=C3=A1bado|domingo), (\d+) de (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre) de (2022|2023|2024) (\d{1,2}:\d{1,2}) - (\d{1,2}:\d{1,2}), (\w*)"
-NEW_REGEX = '<span>([a-zA-ZáéíóúÁÉÍÓÚ]+) (\d+) de ([a-zA-ZáéíóúÁÉÍÓÚ]+) de (\d+)</span>\s*<i><span>(\d{2}:\d{2}) - (\d{2}:\d{2})</span></i>'
+REGEX = '<span>([a-zA-ZáéíóúÁÉÍÓÚ]+) (\d+) de ([a-zA-ZáéíóúÁÉÍÓÚ]+) de (\d+)</span>\s*<i><span>(\d{2}:\d{2}) - (\d{2}:\d{2})</span></i>'
 # The IMAP URL I'm going to use
 IMAP_URL = 'imap.gmail.com'
 # Month object to identify the months as numbers to parse the later with datetime
 MONTHS = {
-    'enero': {
-        'month': 1,
-        'endMonth': 31 
-        },
-    'febrero': {
-        'month': 2,
-        'endMonth': 28
-        },
-    'marzo': {
-        'month': 3,
-        'endMonth': 31
-        },
-    'abril': {
-        'month': 4,
-        'endMonth': 30
-        },
-    'mayo': {
-        'month': 5,
-        'endMonth': 31
-        },
-    'junio': {
-        'month': 6,
-        'endMonth': 30
-        },
-    'julio': {
-        'month': 7,
-        'endMonth': 31
-        },
-    'agosto': {
-        'month': 8,
-        'endMonth': 31
-        },
-    'septiembre': {
-        'month': 9,
-        'endMonth': 30
-        },
-    'octubre': {
-        'month': 10,
-        'endMonth': 21
-        },
-    'noviembre': {
-        'month': 11,
-        'endMonth': 30
-        },
-    'diciembre': {
-        'month': 12,
-        'endMonth': 31
-    }
+    'enero': {'month': 1, 'endMonth': 31 },
+    'febrero': {'month': 2, 'endMonth': 28},
+    'marzo': {'month': 3, 'endMonth': 31},
+    'abril': {'month': 4, 'endMonth': 30},
+    'mayo': {'month': 5, 'endMonth': 31},
+    'junio': {'month': 6, 'endMonth': 30},
+    'julio': {'month': 7, 'endMonth': 31},
+    'agosto': {'month': 8,'endMonth': 31},
+    'septiembre': {'month': 9,'endMonth': 30},
+    'octubre': {'month': 10, 'endMonth': 21},
+    'noviembre': {'month': 11, 'endMonth': 30},
+    'diciembre': {'month': 12, 'endMonth': 31}
 }
 # Google calendar colors id
 EVENT_COLORS_ID = [
@@ -85,20 +47,26 @@ my_credentials = yaml.load(content, Loader=yaml.FullLoader)
 user, password, correo = my_credentials["user"], my_credentials["password"], my_credentials["email"]
 
 # Function to get email content part i.e its body part
-def get_body(msg):
-    if msg.is_multipart():
-        return get_body(msg.get_payload(0))
-    else:
-        return msg.get_payload(None, True)
+# def get_body(msg):
+#     print('this happens?')
+#     if msg.is_multipart():
+#         print('eh?')
+#         return get_body(msg.get_payload(0))
+#     else:
+#         print('a?')
+#         return msg.get_payload(None, True)
 
 # Function to search for a key value pair
 def search(key, value, con):
+    # The result is a tupple with the status and the data
     result, data = con.search(None, key, '"{}"'.format(value))
-    return data # the type return is bytes
+    # the type return is bytes
+    return data
 
 # Function to get the list of emails under this label 
-def get_emails(result_bytes):
-    msgs = [] # all the email data are pushed into here
+def get_emails(result_bytes, con):
+    # all the email data are pushed into here
+    msgs = []
     for num in result_bytes[0].split():
         typ, data = con.fetch(num, '(RFC822)')
         msgs.append(data)
@@ -108,14 +76,13 @@ def get_emails(result_bytes):
 # Function that parse emails
 def parse_emails(email):
     if type(email) is tuple:
-
         # encoding set as utf-8
         content = str(email[1], 'utf-8')
         data = str(content)
 
         # Handling errors related to unicode
         try: 
-            parsed_email = re.findall(NEW_REGEX, data)
+            parsed_email = re.findall(REGEX, data)
             schedule = []
 
             # ensures to cast to a list every tuple of parsed_email and push to schedule list
@@ -138,8 +105,8 @@ def parse_date(day):
     clockout = re.findall('(\d+):(\d+)', day[5])
     
     start_date = datetime.datetime(int(day[3]), MONTHS[day[2]]['month'], int(day[1]), int(entrance[0][0]), int(entrance[0][1]), 0)
-    # With this condition flow we can check if the clockout is in the other
-    # day
+    # With this condition flow we can check if the clockout is in the other day
+    # This works for close shifts at 1am
     if int(clockout[0][0]) < int(entrance[0][0]):
         if end_of_month(day[2], day[1]):
             end_date = datetime.datetime(int(day[3]), MONTHS[day[2]]['month'] + 1, 1, int(clockout[0][0]), int(clockout[0][1]), 0)
@@ -152,6 +119,11 @@ def parse_date(day):
     dates['end_date'] = end_date
 
     return dates
+
+def end_of_month(month, day):
+    end_day = MONTHS[month]['endMonth']
+    next_day = int(day) + 1
+    return end_day < next_day
 
 def create_events_object(schedule):
     events = []
@@ -176,7 +148,7 @@ def create_events_object(schedule):
             colorID = '1'
             summary = "Turno apertura"
         
-        print(summary)
+        print(f'Ingresando: {summary}')
         event = {
             'summary': summary,
             'location': 'Av. las Condes 12207, Las Condes, Región Metropolitana, Chile',
@@ -202,34 +174,21 @@ def create_events_object(schedule):
     
     return events
 
-def archive_email():
-    # This two lines are used to archive the email
-    con.store(message_set[0], '+FLAGS', '\\Deleted')
-    con.expunge()
-
-def end_of_month(month, day):
-    end_day = MONTHS[month]['endMonth']
-    next_day = int(day) + 1
-    return end_day < next_day
-
 def create_schedule():
-    if len(msgs) == 1:
-        schedule = parse_emails(msgs[0][0])
+    con = imaplib.IMAP4_SSL(IMAP_URL)
+    con.login(user, password)
+    con.select('Inbox')
 
+    message_set = search('FROM', correo, con)
+    emails = get_emails(message_set, con)
+
+    if len(emails) == 1:
+        schedule = parse_emails(emails[0][0])
         # archives the email
-        archive_email()
-
+        # con.store(message_set[0], '+FLAGS', '\\Deleted')
+        # con.expunge()
+        
         return schedule
     else:
         print('No email found.')
         return False
-
-
-con = imaplib.IMAP4_SSL(IMAP_URL)
-
-con.login(user, password)
-
-con.select('Inbox')
-
-message_set = search('FROM', correo, con)
-msgs = get_emails(message_set)

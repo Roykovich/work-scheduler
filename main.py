@@ -33,56 +33,53 @@ DATABASE = f"https://api.notion.com/v1/databases/{database}/query"
 DATENOW = datetime.datetime.now()
 
 def main():
-  creds = None
+    creds = None
   # The file token.json stores the user's access and refresh tokens, and is
   # created automatically when the authorization flow completes for the first
   # time.
-  if os.path.exists('token.json'):
-    creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-  # IF there are no (valid) credentials available, let the user log in.
-  if not creds or not creds.valid:
-    if creds and creds.expired and creds.refresh_token:
-      creds.refresh(Request())
-    else:
-      flow = InstalledAppFlow.from_client_secrets_file(
-        'credentials.json', SCOPES
-      )
-      creds = flow.run_local_server(port=0)
+    if os.path.exists('token.json'):
+        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+
+  # If there are no (valid) credentials available, let the user log in.
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                'credentials.json', SCOPES
+            )
+            creds = flow.run_local_server(port=0)
     # Save the credentials for the next run
-    with open('token.json', 'w') as token:
-      token.write(creds.to_json())
+        with open('token.json', 'w') as token:
+            token.write(creds.to_json())
 
-  try:
-    service = build('calendar', 'v3', credentials=creds)
-
-    schedule = create_schedule()
+    try:
+        service = build('calendar', 'v3', credentials=creds)
+        schedule = create_schedule()
     
-    # check if the current day is greater than 15 to delete all the relations
-    # in the pasts months, with that we can have a clear look of the next payment
-    delete_old_entries(DATABASE, NOTION_HEADERS, NOTION_URL)
+        # check if the current day is greater than 15 to delete all the relations
+        # in the pasts months, with that we can have a clear look of the next payment
+        delete_old_entries(DATABASE, NOTION_HEADERS, NOTION_URL)
 
-    if schedule:
-      events = create_events_object(schedule)
-      pages = create_notion_object(schedule)
+        if schedule:
+            events = create_events_object(schedule)
+            pages = create_notion_object(schedule)
 
-      # ! con timedelta(day=x) puedes sumar o restar dias si vas a crear el modulo para los pagos
+        # ! con timedelta(day=x) puedes sumar o restar dias si vas a crear el modulo para los pagos
 
-      print("Starting Google calendar insertions...")
-      for event in events:
-        service.events().insert(calendarId='primary', body=event).execute()
-      print("Google calendar events added sucessfully.")
+        print("Iniciando inserciones en Google Calendar...")
+        for event in events:
+            service.events().insert(calendarId='primary', body=event).execute()
+        print("¡Inserciones en Google Calendar añadidas correctamente!")
 
-      print("Starting Notion database insertions...")
-      for page in pages:
-        data = json.dumps(page)
-        response = requests.request("POST", NOTION_URL, headers=NOTION_HEADERS, data=data)
-      print("Notion insertions added succesfully.")
-      
-    else:
-      return
+        print("Iniciando inserciones en Notion...")
+        for page in pages:
+            data = json.dumps(page)
+            response = requests.request("POST", NOTION_URL, headers=NOTION_HEADERS, data=data)
+        print("¡Inserciones en Notion añadidas correctamente!")
 
-  except HttpError as error:
-    print('An error occurred: %s' % error)
+    except HttpError as error:
+        print('An error occurred: %s' % error)
 
 if __name__ == '__main__':
   main()

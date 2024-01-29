@@ -4,9 +4,22 @@ A simple script that reads an email inbox.
 
 Search mails from an specific recipient and extracts the schedule for the shift of the next week with a regular expression.
 
-# 
+## Installation
+First create a virtual environment
+```
+python3 -m venv email
+```
+Then you need to install python packages for gmail
+```
+pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+```
+After the installation of the require packages you will need to generate a credentials in order to access your gmail account. That's gonna happen when you first start the script and will ask you to log in a link and you will need to store the credentials in a file called `token.json`.
 
-### So ToDos
+After all that you should be good to go :)
+
+
+
+### ToDos
 
 - [x] Add relations in the script with to the payments database
 - [x] Make the script make a relation and add it to the first payment view or the secon payment view. this depends if the entrance day is after or before 15 day of month

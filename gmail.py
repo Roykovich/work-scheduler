@@ -79,12 +79,10 @@ def parse_emails(email):
         # encoding set as utf-8
         content = str(email[1], 'utf-8')
         data = str(content)
-
         # Handling errors related to unicode
         try: 
             parsed_email = re.findall(REGEX, data)
             schedule = []
-
             # ensures to cast to a list every tuple of parsed_email and push to schedule list
             for parsed in parsed_email:
                 schedule.append(list(parsed))
@@ -148,7 +146,7 @@ def create_events_object(schedule):
             colorID = '1'
             summary = "Turno apertura"
         
-        print(f'Ingresando: {summary}')
+        print(f'[+] Ingresando: {summary}')
         event = {
             'summary': summary,
             'location': 'Av. las Condes 12207, Las Condes, Región Metropolitana, Chile',
@@ -190,5 +188,5 @@ def create_schedule():
         
         return schedule
     else:
-        print('No email found.')
+        print('[!] No se encontraron correos con el horario')
         return False

@@ -61,9 +61,12 @@ def main():
         # in the pasts months, with that we can have a clear look of the next payment
         delete_old_entries(DATABASE, NOTION_HEADERS, NOTION_URL)
 
-        if schedule:
-            events = create_events_object(schedule)
-            pages = create_notion_object(schedule)
+        if not schedule:
+            print("[!] Saliendo")
+            return
+        
+        events = create_events_object(schedule)
+        pages = create_notion_object(schedule)
 
         # ! con timedelta(day=x) puedes sumar o restar dias si vas a crear el modulo para los pagos
 

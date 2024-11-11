@@ -2,7 +2,7 @@ import imaplib, yaml, re, datetime
 import os.path
 
 # Regex string to parse the email content that I want
-REGEX = '<span>([a-zA-ZáéíóúÁÉÍÓÚ]+) (\d+) de ([a-zA-ZáéíóúÁÉÍÓÚ]+) de (\d+)</span>\s*<i><span>(\d{2}:\d{2}) - (\d{2}:\d{2})</span></i>'
+REGEX = '<span>([a-zA-ZáéíóúÁÉÍÓÚ]+), (\d+) de ([a-zA-ZáéíóúÁÉÍÓÚ]+) de (\d+)</span>\s*<i><span>(\d{2}:\d{2}) - (\d{2}:\d{2})</span></i>'
 # The IMAP URL I'm going to use
 IMAP_URL = 'imap.gmail.com'
 # Month object to identify the months as numbers to parse the later with datetime

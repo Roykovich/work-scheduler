@@ -62,7 +62,7 @@ def main():
         delete_old_entries(DATABASE, NOTION_HEADERS, NOTION_URL)
 
         if not schedule:
-            print("[!] Saliendo")
+            print("[!] Horarios no encontrados. Saliendo")
             return
         
         events = create_events_object(schedule)

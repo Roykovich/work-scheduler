@@ -44,7 +44,7 @@ def create_notion_object(schedule):
         entrance = date["start_date"].day
         shift = None
 
-        if entrance_hour >= 11 and (clockout_hour == 22 or clockout_hour == 9): # Medium
+        if entrance_hour >= 11 and clockout_hour <= 22: # Medium
             shift = "Medio"
         elif entrance_hour >= 15 and clockout_hour == 1: # closing
             shift = "Cierre"

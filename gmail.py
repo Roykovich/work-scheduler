@@ -133,7 +133,7 @@ def create_events_object(schedule):
         summary = None
         colorID = None
         
-        if entrance >= 11 and (clockout == 22 or clockout == 9): # Medium
+        if entrance >= 11 and clockout <= 22: # Medium
             colorID = '11'
             summary = "Medio"
         elif entrance >= 15 and clockout == 1: # closing

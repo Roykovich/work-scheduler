@@ -133,18 +133,18 @@ def create_events_object(schedule):
         summary = None
         colorID = None
         
-        if entrance >= 11 and clockout == 22: # Medium
+        if entrance >= 11 and (clockout == 22 or clockout == 9): # Medium
             colorID = '11'
-            summary = "Turno medio"
+            summary = "Medio"
         elif entrance >= 15 and clockout == 1: # closing
             colorID = '10'
-            summary = "Turno cierre"
+            summary = "Cierre"
         elif entrance >= 20 and clockout <= 8: # Nocturnal
-            colorID = '8'
-            summary = "Turno nocturno"
+            colorID = '8' 
+            summary = "Nocturno"
         else:
             colorID = '1'
-            summary = "Turno apertura"
+            summary = "Apertura"
         
         print(f'[+] Ingresando: {summary}')
         event = {

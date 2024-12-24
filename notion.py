@@ -44,14 +44,14 @@ def create_notion_object(schedule):
         entrance = date["start_date"].day
         shift = None
 
-        if entrance_hour >= 11 and clockout_hour == 22: # Medium
-            shift = "Turno medio"
+        if entrance_hour >= 11 and (clockout_hour == 22 or clockout_hour == 9): # Medium
+            shift = "Medio"
         elif entrance_hour >= 15 and clockout_hour == 1: # closing
-            shift = "Turno cierre"
+            shift = "Cierre"
         elif entrance_hour >= 20 and clockout_hour <= 8: # Nocturnal
-            shift = "Turno nocturno"
+            shift = "Nocturno"
         else:
-            shift = "Turno apertura"
+            shift = "Apertura"
 
         page = {
             "parent": {
